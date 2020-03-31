@@ -33,6 +33,8 @@ namespace library_web
       services.AddScoped<IDbConnection>(x => CreateDbConnection());
       services.AddTransient<BooksService>();
       services.AddTransient<BookRepo>();
+      services.AddTransient<LibraryRepo>();
+      services.AddTransient<LibrarysService>();
     }
     private IDbConnection CreateDbConnection()
     {

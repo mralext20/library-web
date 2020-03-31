@@ -1,8 +1,8 @@
 namespace library_web.Models
 {
-  class Library
+  public class Library
   {
-    public int id { get; }
+    public int id { get; set; }
     public string title { get; set; }
   }
 }

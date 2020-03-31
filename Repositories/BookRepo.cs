@@ -22,7 +22,7 @@ namespace library_web.Repositories
     internal Book Get(int id)
     {
       string sql = "SELECT * FROM books WHERE id = @id";
-      return _db.QueryFirstOrDefault<Book>(sql);
+      return _db.QueryFirstOrDefault<Book>(sql, new { id });
     }
 
 
