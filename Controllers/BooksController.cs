@@ -1,22 +1,30 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using library_web.db;
 using library_web.Models;
+using library_web.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace library_web.Controllers
 {
+
+
   [ApiController]
   [Route("api/[controller]")]
   public class BooksController : ControllerBase
   {
+    private BooksService _bs { get; set; }
+    public BooksController(BooksService bs)
+    {
+      _bs = bs;
+    }
+
+
     [HttpGet]
     public ActionResult<IEnumerable<Book>> Get()
     {
       try
       {
-        return Ok(FakeDb.books);
+        return Ok(_bs.Get());
       }
       catch (Exception e)
       {
@@ -24,16 +32,12 @@ namespace library_web.Controllers
       }
     }
     [HttpGet("{id}")]
-    public ActionResult<Book> GetById(string id)
+    public ActionResult<Book> GetById(int id)
     {
 
       try
       {
-        Book book = FakeDb.books.Find(b => b.id == id);
-        if (book is null)
-        {
-          throw new ArgumentNullException(nameof(book));
-        }
+        Book book = _bs.Get(id);
         return Ok(book);
       }
       catch (ArgumentNullException)
@@ -47,11 +51,11 @@ namespace library_web.Controllers
     }
 
     [HttpPost]
-    public ActionResult<Book> Create([FromBody] Book book)
+    public ActionResult<Book> Create([FromBody] Book newBook)
     {
       try
       {
-        FakeDb.books.Add(book);
+        Book book = _bs.create(newBook);
         return Created($"/api/books/{book.id}", book);
       }
       catch (Exception e)
@@ -61,58 +65,16 @@ namespace library_web.Controllers
       }
     }
 
-    [HttpPut("{bookId}/checkout")]
-    public ActionResult<Book> Checkout(string bookId)
+    [HttpDelete("{id}")]
+    public ActionResult<string> Delete(int id)
     {
       try
       {
-        Book book = FakeDb.books.Find(b => b.id == bookId);
-        if (book is null)
-        {
-          throw new ArgumentNullException(nameof(book));
-        }
-        if (!book.IsAvalible)
-        {
-          throw new Exception("Book Already Checked Out");
-        }
-        book.IsAvalible = false;
-        return Ok(book);
-      }
-      catch (ArgumentNullException)
-      {
-        return BadRequest("book does not exist");
+        return Ok(_bs.Delete(id));
       }
       catch (System.Exception e)
       {
         return BadRequest(e.Message);
-      }
-    }
-
-    [HttpPut("{bookId}/return")]
-    public ActionResult<Book> Return(string bookId)
-    {
-      try
-      {
-        Book book = FakeDb.books.Find(b => b.id == bookId);
-        if (book is null)
-        {
-          throw new ArgumentNullException(nameof(book));
-        }
-        if (book.IsAvalible)
-        {
-          throw new Exception("that book is not checked out, you cant return it!");
-        }
-        book.IsAvalible = true;
-        return Ok(book);
-      }
-      catch (ArgumentNullException)
-      {
-        return BadRequest("That book does not exist");
-      }
-      catch (Exception e)
-      {
-        return BadRequest(e.Message);
-
       }
     }
   }
